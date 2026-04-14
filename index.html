@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JimoTown — Corporate Humor</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #f0ede8;
+  --surface: #faf9f7;
+  --surface2: #ebe8e2;
+  --border: #d8d3cb;
+  --ink: #1a1612;
+  --ink2: #4a4540;
+  --accent: #c8410a;
+  --accent2: #1a3a6b;
+  --yellow: #f5a623;
+  --red: #e53e3e;
+  --blue: #2b6cb0;
+  --green: #276749;
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  min-height: 100vh;
+  padding: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23c8b8a2' stroke-width='0.4' opacity='0.4'/%3E%3C/svg%3E");
+}
+.app {
+  max-width: 480px; margin: 0 auto;
+  background: var(--surface);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  box-shadow: 4px 6px 0 #c8b8a2, 8px 10px 0 #d8d3cb;
+}
+
+/* HEADER */
+.app-header {
+  background: var(--ink);
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.app-logo { font-family: var(--font-mono); font-size: 11px; color: #fff; letter-spacing: 0.2em; text-transform: uppercase; }
+.app-tagline { font-family: var(--font-mono); font-size: 9px; color: var(--yellow); letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* PREVIEW */
+.preview-section { background: var(--surface2); padding: 24px 20px 20px; text-align: center; border-bottom: 1.5px solid var(--border); }
+.post-frame { width: 100%; max-width: 300px; margin: 0 auto; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden; box-shadow: 3px 5px 0 #b0a898, 6px 8px 0 var(--border); border: 1.5px solid rgba(0,0,0,0.15); }
+
+/* POST CANVAS */
+#post-canvas {
+  width: 100%; height: 100%;
+  background: #0c0e14;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 44px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#post-canvas::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.post-category-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 3px; border: 1px solid currentColor;
+  margin-bottom: 22px; opacity: 0.9;
+  color: var(--badge-color, #f5a623); flex-shrink: 0;
+}
+.post-rule { width: 40px; height: 1px; background: rgba(255,255,255,0.12); margin-bottom: 22px; flex-shrink: 0; }
+.post-text {
+  color: #f5f0eb; line-height: 1.5;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 20px; font-weight: 600;
+  white-space: pre-wrap; word-break: break-word; flex-grow: 0;
+}
+.post-rule-bottom { width: 40px; height: 1px; background: rgba(255,255,255,0.12); margin-top: 22px; flex-shrink: 0; }
+.post-handle { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 18px; letter-spacing: 0.14em; flex-shrink: 0; }
+
+/* PANEL */
+.panel-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+  color: var(--ink2); letter-spacing: 0.14em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+
+textarea {
+  width: 100%; background: #fff; border: 1.5px solid var(--border);
+  color: var(--ink); font-size: 14px; padding: 12px 14px;
+  border-radius: var(--radius-sm); outline: none; resize: vertical;
+  min-height: 90px; transition: border-color .2s; line-height: 1.6;
+  font-family: var(--font-body);
+}
+textarea:focus { border-color: var(--accent); }
+#fact-text { text-align: center; }
+
+/* GENERATE BUTTONS */
+.gen-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.gen-btn {
+  padding: 13px 8px; border: 2px solid transparent; border-radius: var(--radius-sm);
+  cursor: pointer; font-family: var(--font-mono); font-size: 10px;
+  font-weight: 600; letter-spacing: 0.04em;
+  transition: all .15s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  line-height: 1.3; text-align: center;
+}
+.gen-btn:hover { transform: translateY(-1px); }
+.gen-btn:active { transform: translateY(0); }
+.gen-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.gen-btn.truth    { background: #fff8ee; border-color: #f5a623; color: #92400e; }
+.gen-btn.meeting  { background: #fff5f5; border-color: #e53e3e; color: #9b1c1c; }
+.gen-btn.email    { background: #eff6ff; border-color: #2b6cb0; color: #1e3a5f; }
+.gen-btn.survival { background: #f0fff4; border-color: #276749; color: #1a4731; }
+.gen-btn .btn-emoji { font-size: 20px; }
+.gen-btn .btn-label { font-size: 10px; letter-spacing: 0.06em; }
+
+.util-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.util-btn {
+  padding: 10px 8px; background: var(--surface2); color: var(--ink2);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+  transition: all .15s;
+}
+.util-btn.paste { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
+.util-btn.paste:hover { background: #1e4e8c; border-color: #1e4e8c; }
+.util-btn.danger { background: var(--red); color: #fff; border-color: var(--red); }
+.util-btn.danger:hover { background: #c53030; border-color: #c53030; }
+.util-btn:not(.paste):not(.danger):hover { background: #e8e4de; }
+
+/* CHIPS */
+.chips-wrap {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 10px 12px; background: var(--surface2);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  max-height: 120px; overflow-y: auto;
+}
+.chip {
+  font-family: var(--font-mono); font-size: 10.5px;
+  padding: 4px 10px; border: 1.5px solid var(--border); border-radius: 4px;
+  cursor: pointer; background: var(--surface); color: var(--ink2);
+  transition: all .12s; user-select: none;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: #fff3ee; border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.cta-chip { font-size: 10px; padding: 5px 10px; line-height: 1.4; }
+
+/* REFRESH */
+.refresh-btn {
+  background: none; border: none; color: var(--accent2); cursor: pointer;
+  padding: 2px 4px; font-size: 14px; line-height: 1;
+  border-radius: 50%; transition: transform .4s ease, background .2s;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.refresh-btn:hover { background: #e8edf5; }
+.refresh-btn.spinning { animation: spin .45s ease; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* CAPTION BOX */
+.caption-box {
+	display: none;
+  background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 14px; font-size: 12.5px; line-height: 1.75; white-space: pre-wrap;
+  min-height: 100px; color: var(--ink); font-family: var(--font-body);
+}
+
+/* ACTION BUTTONS */
+.btn-primary {
+  width: 100%; padding: 16px;
+  background: var(--ink); color: #f5f0eb;
+  border: 2px solid var(--ink); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+  letter-spacing: 0.06em; cursor: pointer; transition: all .15s;
+  box-shadow: 2px 3px 0 #4a4540;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 3px 5px 0 #4a4540; }
+.btn-secondary {
+  width: 100%; padding: 13px;
+  background: var(--surface); color: var(--ink);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-weight: 500; font-size: 12px;
+  letter-spacing: 0.06em; cursor: pointer; transition: background .15s;
+}
+.btn-secondary:hover { background: var(--surface2); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #f5f0eb;
+  padding: 10px 22px; border-radius: 4px;
+  font-family: var(--font-mono); font-size: 12px;
+  opacity: 0; transition: all .3s; z-index: 999;
+  border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">CorporateRost</div>
+    <div class="app-tagline">Corporate Humor Studio</div>
+  </div>
+
+  <div class="preview-section">
+    <div class="post-frame">
+      <div id="post-canvas">
+        <div class="post-category-badge" id="post-badge">CORPORATE TRUTH</div>
+        <div class="post-rule"></div>
+        <div class="post-text" id="post-fact">Your post text will appear here...</div>
+        <div class="post-rule-bottom"></div>
+        <div class="post-handle">@CorporateRost</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-body">
+
+    <div class="field-group">
+      <div class="field-label">Content</div>
+      <textarea id="fact-text" placeholder="Click a category below to generate, or type your own..."
+                oninput="syncPost()"></textarea>
+
+      <div class="gen-buttons">
+        <button class="gen-btn truth" id="btn-truth" onclick="generate('truth')">
+          <span class="btn-emoji">😬</span>
+          <span class="btn-label">Corporate Truth</span>
+        </button>
+        <button class="gen-btn meeting" id="btn-meeting" onclick="generate('meeting')">
+          <span class="btn-emoji">🤡</span>
+          <span class="btn-label">Meeting Hell</span>
+        </button>
+        <button class="gen-btn email" id="btn-email" onclick="generate('email')">
+          <span class="btn-emoji">📧</span>
+          <span class="btn-label">Email Culture</span>
+        </button>
+        <button class="gen-btn survival" id="btn-survival" onclick="generate('survival')">
+          <span class="btn-emoji">🧟</span>
+          <span class="btn-label">Office Survival</span>
+        </button>
+      </div>
+
+      <div class="util-buttons">
+        <button class="util-btn paste" onclick="pasteFromClipboard()">📋 Paste</button>
+        <button class="util-btn danger" onclick="clearAll()">🗑 Clear All</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Call to Action</div>
+      <div class="chips-wrap" id="cta-chips"></div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">
+        <span>Caption</span>
+        <span id="body-count" style="font-size:9px; color:var(--ink2);">0 / 200</span>
+      </div>
+      <textarea id="body-text" maxlength="200" placeholder="Add a hook or extra context..."
+                oninput="syncCaption(); updateCharCount(this,'body-count',200)"
+                style="min-height:70px;"></textarea>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">
+        <span>Keywords</span>
+        <button class="refresh-btn" id="kw-refresh" onclick="spinRefresh('kw-refresh'); renderKeywords()">↻</button>
+      </div>
+      <div class="chips-wrap" id="keyword-area"></div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">
+        <span>Hashtags</span>
+        <button class="refresh-btn" id="ht-refresh" onclick="spinRefresh('ht-refresh'); renderHashtags()">↻</button>
+      </div>
+      <div class="chips-wrap" id="hashtag-area"></div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Full Caption</div>
+      <div class="caption-box" id="caption-box">Your caption will appear here...</div>
+    </div>
+
+    <button class="btn-primary" onclick="downloadPost()">📥 Download Reel (1080×1920)</button>
+    <button class="btn-secondary" onclick="copyCaption()">📋 Copy Caption</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── GIST CONFIG ──
+// 1. Create a GitHub Gist with a file named posts.json
+// 2. Paste the raw URL below (click "Raw" in your Gist, copy the URL)
+const GIST_RAW_URL = 'https://gist.githubusercontent.com/AkshayNalange/067ca916f40fe5494793d945973f385b/raw/84f4ac3690e31ec912931ef5e30f61ccb7319692/corporateRost.json';
+// posts.json must follow this shape:
+// {
+//   "truth":    ["post 1", "post 2", ...],
+//   "meeting":  ["post 1", "post 2", ...],
+//   "email":    ["post 1", "post 2", ...],
+//   "survival": ["post 1", "post 2", ...]
+// }
+
+// ── CATEGORIES ──
+const CATEGORIES = {
+  truth:    { label: 'CORPORATE TRUTH', badgeColor: '#f5a623', emoji: '\u{1F62C}' },
+  meeting:  { label: 'MEETING HELL',    badgeColor: '#e53e3e', emoji: '\u{1F921}' },
+  email:    { label: 'EMAIL CULTURE',   badgeColor: '#4169E1', emoji: '\u{1F4E7}' },
+  survival: { label: 'OFFICE SURVIVAL', badgeColor: '#0FFF50', emoji: '\u{1F9DF}' },
+};
+
+// ── GIST CACHE ──
+let gistCache = null;
+async function loadGist() {
+  if (gistCache) return gistCache;
+  if (!GIST_RAW_URL || GIST_RAW_URL === 'YOUR_GIST_RAW_URL_HERE') {
+    showToast('Set your GIST_RAW_URL in the script!'); return null;
+  }
+  const res = await fetch(GIST_RAW_URL + '?t=' + Date.now());
+  if (!res.ok) throw new Error('Gist fetch failed: ' + res.status);
+  gistCache = await res.json();
+  return gistCache;
+}
+
+// ── CTAs ──
+const CTA_OPTIONS = [
+  { emoji: '😭', label: 'Tag someone who needed to hear this.' },
+  { emoji: '💀', label: 'Send this to your manager anonymously.' },
+  { emoji: '👀', label: "Tell me I'm wrong. I'll wait." },
+  { emoji: '🤝', label: 'Follow if your workplace has Wi-Fi and trauma.' },
+  { emoji: '📌', label: 'Save this for your next performance review.' },
+  { emoji: '💬', label: 'Drop your worst meeting story in the comments.' },
+  { emoji: '🔥', label: "Drop a 🔥 if this is your Monday." },
+  { emoji: '🙋', label: 'Raise your hand if this is your office.' },
+  { emoji: '📸', label: 'Screenshot this before HR finds it.' },
+  { emoji: '⚡', label: "Most people nod and say nothing. Don't." },
+  { emoji: '💡', label: "They don't teach this in business school." },
+  { emoji: '🎯', label: 'The quiet ones in the office know this.' },
+  { emoji: '😤', label: 'Nobody talks about this in the "culture deck".' },
+  { emoji: '📊', label: 'This is why your quarterly review hurts.' },
+  { emoji: '🧠', label: 'Work smarter. Or at least survive smarter.' },
+  { emoji: '🚪', label: 'The exit interview has entered the chat.' },
+  { emoji: '💼', label: 'Corporate life hits different after 3 years.' },
+  { emoji: '🤫', label: 'The ones who know this get promoted.' },
+  { emoji: '⏰', label: 'Comment your check-out time. We see you.' },
+  { emoji: '🍕', label: "Free lunch doesn't mean what it used to." },
+];
+
+// ── KEYWORDS ──
+const KEYWORDS = [
+  'corporate life', 'office culture', 'work humor', 'meeting culture', 'hustle culture',
+  'return to office', 'WFH life', 'toxic workplace', 'career growth', 'quiet quitting',
+  'workplace wellness', 'corporate satire', 'linkedin culture', 'employee experience',
+];
+
+// ── HASHTAGS ──
+const HASHTAGS = [
+  '#corporatehumor', '#officelife', '#worklife', '#corporatelife', '#9to5life',
+  '#mondaymotivation', '#corporatememes', '#officememes', '#workhumor', '#corporateculture',
+  '#workplacewellness', '#businesshumor', '#officejokes', '#corporateworld', '#workreels',
+  '#9to5', '#meetingculture', '#remotework', '#wfhlife', '#returntooffice',
+  '#corporatesatire', '#officepolitics', '#workfromhome', '#quietquitting', '#hustle',
+  '#employeeexperience', '#worklifebalance', '#mondaymood', '#officehumor',
+  '#reels', '#reelsinstagram', '#viral', '#explore', '#explorepage', '#fyp', '#trending',
+  '#reelsvideo', '#instareels', '#viralvideos', '#reelsforyou', '#instagramreels',
+  '#trendingreels', '#reelsoftheday', '#exploremore', '#foryoupage',
+  '#viralreel', '#contentcreator', '#instaviral', '#trendingnow', '#goviral',
+  '#careertips', '#careeradvice', '#leadership', '#management', '#workplacememes',
+  '#corporatehumour', '#workstress', '#officeworker', '#corporatetok',
+];
+
+let activeCTA = CTA_OPTIONS[0].label;
+let activeKeywords = new Set(KEYWORDS);
+
+// ── HELPERS ──
+function isIOS() {
+  return /iP(hone|ad|od)/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+async function pasteFromClipboard() {
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      const text = await navigator.clipboard.readText();
+      if (text) { document.getElementById('fact-text').value = text; syncPost(); showToast('📋 Pasted!'); return; }
+    }
+  } catch {}
+  document.getElementById('fact-text').focus();
+  showToast('Long-press the text box and tap Paste');
+}
+function spinRefresh(id) {
+  const btn = document.getElementById(id);
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 450);
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+// ── GENERATE FROM GIST ──
+async function generate(key) {
+  const cat = CATEGORIES[key];
+  const btn = document.getElementById('btn-' + key);
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = `<span class="btn-emoji">⏳</span><span class="btn-label">Loading…</span>`;
+  ['truth','meeting','email','survival'].forEach(k => document.getElementById('btn-'+k).disabled = true);
+
+  try {
+    const data = await loadGist();
+    if (!data) { btn.innerHTML = origHTML; ['truth','meeting','email','survival'].forEach(k => document.getElementById('btn-'+k).disabled = false); return; }
+    const posts = data[key];
+    if (!posts || posts.length === 0) { showToast('❌ No posts found for ' + key); btn.innerHTML = origHTML; ['truth','meeting','email','survival'].forEach(k => document.getElementById('btn-'+k).disabled = false); return; }
+    const text = posts[Math.floor(Math.random() * posts.length)].trim();
+    document.getElementById('fact-text').value = text;
+    updateCanvasCategory(key);
+    syncPost();
+    showToast(cat.emoji + ' ' + cat.label + ' loaded!');
+  } catch (e) {
+    console.error(e);
+    showToast('❌ Could not load Gist — check URL & CORS');
+  }
+
+  btn.innerHTML = origHTML;
+  ['truth','meeting','email','survival'].forEach(k => document.getElementById('btn-'+k).disabled = false);
+}
+
+// ── CANVAS CATEGORY ──
+function updateCanvasCategory(key) {
+  const cat = CATEGORIES[key];
+  const badge = document.getElementById('post-badge');
+  badge.textContent = cat.label;
+  badge.style.setProperty('--badge-color', cat.badgeColor);
+}
+
+// ── RENDER CHIPS ──
+function renderCTAChips() {
+  const area = document.getElementById('cta-chips');
+  area.innerHTML = '';
+  CTA_OPTIONS.forEach(opt => {
+    const chip = document.createElement('div');
+    chip.className = 'chip cta-chip' + (opt.label === activeCTA ? ' active' : '');
+    chip.textContent = opt.emoji + ' ' + opt.label;
+    chip.onclick = () => {
+      activeCTA = opt.label;
+      document.querySelectorAll('#cta-chips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      syncCaption();
+    };
+    area.appendChild(chip);
+  });
+}
+
+function renderKeywords() {
+  const area = document.getElementById('keyword-area');
+  area.innerHTML = '';
+  shuffle(KEYWORDS).forEach(kw => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (activeKeywords.has(kw) ? ' active' : '');
+    chip.textContent = kw;
+    chip.onclick = () => {
+      chip.classList.toggle('active');
+      activeKeywords[chip.classList.contains('active') ? 'add' : 'delete'](kw);
+      syncCaption();
+    };
+    area.appendChild(chip);
+  });
+  syncCaption();
+}
+
+function renderHashtags() {
+  const area = document.getElementById('hashtag-area');
+  area.innerHTML = '';
+  shuffle(HASHTAGS).slice(0, 6).forEach(tag => {
+    const chip = document.createElement('div');
+    chip.className = 'chip active';
+    chip.textContent = tag;
+    chip.onclick = () => { chip.classList.toggle('active'); syncCaption(); };
+    area.appendChild(chip);
+  });
+  syncCaption();
+}
+
+// ── SYNC ──
+function syncPost() {
+  const val = document.getElementById('fact-text').value;
+  document.getElementById('post-fact').textContent = val.trim() || 'Your post text will appear here...';
+  syncCaption();
+}
+
+function syncCaption() {
+  const body = document.getElementById('body-text').value.trim();
+  const keywords = KEYWORDS.filter(kw => activeKeywords.has(kw));
+  const tags = Array.from(document.querySelectorAll('#hashtag-area .chip.active')).map(c => c.textContent).join(' ');
+  let caption = body ? body + '\n\n' : '';
+  caption += activeCTA;
+  if (keywords.length > 0) caption += '\n\n[ ' + keywords.join(', ') + ' ]';
+  if (tags) caption += '\n\n' + tags;
+  document.getElementById('caption-box').textContent = caption.trim();
+}
+
+function updateCharCount(el, id, max) {
+  document.getElementById(id).textContent = el.value.length + ' / ' + max;
+}
+
+function copyCaption() {
+  const text = document.getElementById('caption-box').textContent;
+  if (!text || text.startsWith('Your caption')) return showToast('Generate something first!');
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Caption copied!'));
+}
+
+function clearAll() {
+  document.getElementById('fact-text').value = '';
+  document.getElementById('body-text').value = '';
+  document.getElementById('body-count').textContent = '0 / 200';
+  activeCTA = CTA_OPTIONS[0].label;
+  activeKeywords = new Set(KEYWORDS);
+  updateCanvasCategory('truth');
+  renderCTAChips(); renderKeywords(); renderHashtags();
+  syncPost();
+  showToast('Wiped clean 🗑');
+}
+
+// ── DOWNLOAD ──
+async function downloadPost() {
+  const btn = document.querySelector('.btn-primary');
+  const orig = btn.textContent;
+  btn.textContent = 'Generating...'; btn.disabled = true;
+  try {
+    const canvas = await html2canvas(document.getElementById('post-canvas'), {
+      scale: 1080 / document.getElementById('post-canvas').offsetWidth,
+      backgroundColor: '#0c0e14', useCORS: true,
+    });
+    const dataUrl = canvas.toDataURL('image/png', 1.0);
+    if (isIOS() && navigator.share) {
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `JimoTown-${Date.now()}.png`, { type: 'image/png' });
+      const shareData = { files: [file] };
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        showToast('✅ Share sheet opened!');
+        btn.textContent = orig; btn.disabled = false; return;
+      }
+    }
+    const link = document.createElement('a');
+    link.download = `JimoTown-${Date.now()}.png`;
+    link.href = dataUrl; link.click();
+    showToast('✅ Downloaded!');
+  } catch (e) {
+    console.error(e); showToast('❌ Download failed');
+  }
+  btn.textContent = orig; btn.disabled = false;
+}
+
+// ── INIT ──
+window.onload = () => {
+  updateCanvasCategory('truth');
+  renderCTAChips(); renderKeywords(); renderHashtags();
+  syncPost();
+};
+</script>
+</body>
+</html>
