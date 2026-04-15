@@ -499,7 +499,7 @@ function renderKeywords() {
 function renderHashtags() {
   const area = document.getElementById('hashtag-area');
   area.innerHTML = '';
-  shuffle(HASHTAGS).slice(0, 6).forEach(tag => {
+  shuffle(HASHTAGS).slice(0, 5).forEach(tag => {
     const chip = document.createElement('div');
     chip.className = 'chip active';
     chip.textContent = tag;
